@@ -18,7 +18,7 @@ def main():
             if rdata:
                 sock.sendto(rdata, addr)
     except KeyboardInterrupt:
-        dns_server.cache_handler.save("cache_handler")
+        dns_server.cache_handler.save("cache")
         sock.close()
 
 

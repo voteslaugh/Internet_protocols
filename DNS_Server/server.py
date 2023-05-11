@@ -9,7 +9,7 @@ class DNSServer:
 
     def __init__(self):
         self.cache_handler = CacheHandler()
-        self.cache_handler.load("cache_handler")
+        self.cache_handler.load("cache")
         self.logger = logging.getLogger(__name__)
 
     def process(self, query):
