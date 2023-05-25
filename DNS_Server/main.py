@@ -1,25 +1,17 @@
-from server import DNSServer
-import socket
+import sys
+import traceback
 
-LOCALHOST = "127.0.0.1"
-PORT = 53
+from app.server import Server
 
 
 def main():
-    dns_server = DNSServer()
-    dns_server.cache_handler.load("cache")
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind((LOCALHOST, PORT))
-
     try:
-        while True:
-            query, addr = sock.recvfrom(2048)
-            rdata = dns_server.process(query)
-            if rdata:
-                sock.sendto(rdata, addr)
-    except KeyboardInterrupt:
-        dns_server.cache_handler.save("cache")
-        sock.close()
+        Server().run()
+    except KeyboardInterrupt as e:
+        print(f"Server stopped^ {e}")
+    except Exception as e:
+        traceback.print_tb(sys.exc_info()[2])
+        print(f"Unhandled error: {e}")
 
 
 if __name__ == "__main__":
