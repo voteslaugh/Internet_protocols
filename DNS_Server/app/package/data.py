@@ -1,11 +1,45 @@
 import struct
 from dataclasses import dataclass
+from enum import Enum
 from typing import List
 
-from header import DNSHeader
-from query_type import QueryType
-from question import DNSQuestion
-from resource_record import DNSResourceRecord
+
+class QueryType(int, Enum):
+    A = 1
+    NS = 2
+    PTR = 12
+    AAAA = 28
+
+
+class QueryClass(int, Enum):
+    IN = 1
+
+
+@dataclass
+class DNSHeader:
+    id: int
+    flags: int
+    qd_count: int
+    an_count: int
+    ns_count: int
+    ar_count: int
+
+
+@dataclass
+class DNSQuestion:
+    q_name: str
+    q_type: QueryType
+    q_class: QueryClass
+
+
+@dataclass
+class DNSResourceRecord:
+    r_name: str
+    r_type: QueryType
+    r_class: QueryClass
+    r_ttl: int
+    rd_length: int
+    r_data: str
 
 
 @dataclass
@@ -39,7 +73,7 @@ class DNSPackage:
                 DNSQuestion(
                     self._parse_name(),
                     *struct.unpack(
-                        "!HH", self.data[self._pointer: self._pointer + step]
+                        "!HH", self.data[self._pointer : self._pointer + step]
                     ),
                 )
             )
@@ -58,7 +92,7 @@ class DNSPackage:
         for _ in range(length):
             r_name = self._parse_name()
             r_type, r_class, r_ttl, rd_length = struct.unpack(
-                "!HHIH", self.data[self._pointer: self._pointer + step]
+                "!HHIH", self.data[self._pointer : self._pointer + step]
             )
             self._pointer += step
             r_data = self._parse_resource_body(r_type, rd_length)
@@ -84,16 +118,16 @@ class DNSPackage:
                         self._pointer = position + 1
                     break
                 position += 1
-                name_list.append(self.data[position: position + length])
+                name_list.append(self.data[position : position + length])
                 position += length
-        name = ".".join([i.decode("cp1251") for i in name_list])
+        name = ".".join([i.decode("ascii") for i in name_list])
         return name
 
     def _parse_resource_body(self, r_type, rd_length):
         if r_type == QueryType.A.value:
             ipv4_address = struct.unpack(
                 f"!{rd_length}B",
-                self.data[self._pointer: self._pointer + rd_length],
+                self.data[self._pointer : self._pointer + rd_length],
             )
             data = ".".join(str(octet) for octet in ipv4_address)
             self._pointer += rd_length
@@ -102,7 +136,7 @@ class DNSPackage:
         elif r_type == QueryType.AAAA.value:
             ipv6_address = struct.unpack(
                 f"!{rd_length // 2}H",
-                self.data[self._pointer: self._pointer + rd_length],
+                self.data[self._pointer : self._pointer + rd_length],
             )
             data = ":".join(str(hex(octet))[2:] for octet in ipv6_address)
             self._pointer += rd_length

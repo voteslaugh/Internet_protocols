@@ -1,11 +1,13 @@
 import struct
 from typing import List, Tuple
 
-from dns.header import DNSHeader
-from dns.question import DNSQuestion
-from dns.resource_record import DNSResourceRecord
-from dns.query_class import QueryClass
-from dns.query_type import QueryType
+from app.package.data import (
+    DNSHeader,
+    DNSQuestion,
+    DNSResourceRecord,
+    QueryClass,
+    QueryType,
+)
 
 
 def get_unsupported_response(h_id: bytes) -> bytes:
@@ -22,9 +24,9 @@ def get_unsupported_response(h_id: bytes) -> bytes:
 
 
 def get_response(
-        req_header: DNSHeader,
-        req_questions: List[DNSQuestion],
-        res_answer_records: List[DNSResourceRecord],
+    req_header: DNSHeader,
+    req_questions: List[DNSQuestion],
+    res_answer_records: List[DNSResourceRecord],
 ) -> bytes:
     package = struct.pack(
         "!6H",
@@ -45,9 +47,9 @@ def get_response(
 
     for answer in res_answer_records:
         package += (
-                _pack_domain_name(answer.r_name)[1]
-                + struct.pack("!HHI", answer.r_type, answer.r_class, answer.r_ttl)
-                + _pack_r_data(answer.r_type, answer.rd_length, answer.r_data)
+            _pack_domain_name(answer.r_name)[1]
+            + struct.pack("!HHI", answer.r_type, answer.r_class, answer.r_ttl)
+            + _pack_r_data(answer.r_type, answer.rd_length, answer.r_data)
         )
 
     return package
@@ -83,7 +85,7 @@ def _pack_question(q_data: str, q_type: QueryType, q_class: QueryClass) -> bytes
 
 
 def get_request(
-        r_id: int, domain_name: str, q_type: QueryType, q_class: QueryClass
+    r_id: int, domain_name: str, q_type: QueryType, q_class: QueryClass
 ) -> bytes:
     return struct.pack(
         "!6H",

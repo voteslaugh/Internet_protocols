@@ -1,19 +1,16 @@
 import socket
 from typing import List, Optional
 
-from app.components import builder
-from app import dependencies
-from components.dns.package import DNSPackage
-from components.dns.query_class import QueryClass
-from components.dns.query_type import QueryType
+from app import builder, dependencies
+from app.package.data import DNSPackage, QueryClass, QueryType
 
 settings = dependencies.get_server_settings()
 
 
 def resolve(
-        q_request: bytes,
-        server_ip: str = settings["root_server_ip"],
-        server_port: int = settings["root_server_port"],
+    q_request: bytes,
+    server_ip: str = settings["root_server_ip"],
+    server_port: int = settings["root_server_port"],
 ) -> Optional[DNSPackage]:
     response = _ask_dns_server(q_request, server_ip, server_port)
     response_package = DNSPackage(response)
@@ -32,10 +29,10 @@ def resolve(
 
 
 def _get_ips_by_name(
-        r_id: int,
-        name: str,
-        server_ip: str = settings["root_server_ip"],
-        server_port: int = settings["root_server_port"],
+    r_id: int,
+    name: str,
+    server_ip: str = settings["root_server_ip"],
+    server_port: int = settings["root_server_port"],
 ) -> Optional[List[str]]:
     q_request = builder.get_request(
         r_id,

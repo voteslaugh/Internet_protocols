@@ -5,8 +5,7 @@ from datetime import datetime
 from threading import Lock, Thread
 from typing import Dict, List, Tuple
 
-from components.dns.resource_record import DNSResourceRecord
-from components.dns.query_type import QueryType
+from app.package.data import DNSResourceRecord, QueryType
 
 
 class Cacher:
@@ -32,10 +31,10 @@ class Cacher:
         self.cleaner.start()
 
     def add(
-            self,
-            q_name: str,
-            q_type: QueryType,
-            answer_records: List[DNSResourceRecord],
+        self,
+        q_name: str,
+        q_type: QueryType,
+        answer_records: List[DNSResourceRecord],
     ):
         if q_name not in self.buffer:
             self.buffer[q_name] = {}
@@ -72,9 +71,7 @@ class Cacher:
     def _is_late_records(self, q_name, q_type) -> bool:
         t, records = self.buffer[q_name][q_type]
         dt = (datetime.now() - t).seconds
-        print(dt)
         for record in records:
-            print(record.r_ttl)
             if dt >= record.r_ttl:
                 return True
         return False

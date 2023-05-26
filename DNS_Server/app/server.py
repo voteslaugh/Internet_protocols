@@ -1,10 +1,9 @@
 import signal
 import socket
+import time
 
-from app.components import builder
-from app import dependencies, resolver
-from app.cacher import Cacher
-from app.components.dns.package import DNSPackage
+from app import Cacher, builder, dependencies, resolver
+from app.package.data import DNSPackage
 
 settings = dependencies.get_server_settings()
 
@@ -17,17 +16,17 @@ class Server:
         self._handle_flag = True
         signal.signal(signal.SIGINT, self._close)
 
-    def _init_cacher(self) -> None:
+    def _init_cacher(self):
         self._cacher = Cacher(settings["cache_filepath"], settings["clean_period"])
         self._cacher.load()
         self._cacher.start()
 
-    def run(self) -> None:
+    def run(self):
         while self._handle_flag:
             request, address = self._server_socket.recvfrom(settings["request_size"])
             self._handle_client(request, address)
 
-    def _handle_client(self, request: bytes, address: str) -> None:
+    def _handle_client(self, request: bytes, address: str):
         request_package = DNSPackage(request)
 
         total_a_records = []
@@ -39,8 +38,9 @@ class Server:
                 question.q_type,
                 question.q_class,
             )
+
             if (
-                    cached_info := self._cacher.get(question.q_name, question.q_type)
+                cached_info := self._cacher.get(question.q_name, question.q_type)
             ) is None:
                 try:
                     answer = resolver.resolve(q_request=q_request)
@@ -53,7 +53,6 @@ class Server:
                 a_records = answer.answer_records
                 self._cacher.add(question.q_name, question.q_type, a_records)
             else:
-                print("from cache")
                 _, a_records = cached_info
 
             total_a_records += a_records
@@ -63,7 +62,7 @@ class Server:
         )
         self._server_socket.sendto(response, address)
 
-    def _close(self, _, __) -> None:
+    def _close(self, _, __):
         self._handle_flag = False
         self._server_socket.close()
         self._cacher.save()
