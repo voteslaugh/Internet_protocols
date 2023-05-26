@@ -1,0 +1,2 @@
+class SMTPError(Exception):
+    pass
