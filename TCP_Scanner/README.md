@@ -1,24 +1,28 @@
-TCP Scanner
+TCP-UDP Scanner
 ======
 
-This is a simple TCP scanner that can be used to find open ports on a given host. It takes in a hostname or IP address, as well as a range of ports to scan.
+Данный скрипт позволяет определить открытые TCP и UDP порты в заданном диапазоне, а также определить протокол, который работает на открытом порте.
 
-## Usage
+## Параметры запуска
+```
+usage: scanner.py [-h] [-p PORTS] target
 
-To use the TCP scanner, simply run the `scanner.py` script with the desired arguments. The available arguments are:
+positional arguments:
+  target                Целевой адрес сканирования
 
-- `--host`: The hostname or IP address to scan. Defaults to `localhost`.
-- `--bottom`: The bottom range of ports to scan. Defaults to `1`.
-- `--top`: The top range of ports to scan. Defaults to `65535`.
-
-For example, to scan ports 80 through 100 on `example.com`, you would run:
-
-```bash
-python3 scanner.py --host example.com --bottom 80 --top 100
+optional arguments:
+  -h, --help            show this help message and exit
+  -p PORTS, --ports PORTS
+                        Список портов для сканирования, указанных через ",";
+                        можно указывать диапазон (80, 144, 2303-2400)
 ```
 
-To check localhost open ports:
+## Пример запуска
 
-```bash
-python3 scanner.py
+```
+>python3 scanner.py -p 631,6942,53 127.0.0.1
+Scanning 127.0.0.1...
+631/tcp 	ipp 	open
+6942/udp 	open
+53/tcp 	closed
 ```
